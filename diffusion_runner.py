@@ -9,12 +9,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QTextEdit, QLabel, QFormLayout, QGroupBox, \
     QSpinBox, QFileDialog, QLineEdit, QComboBox, QCheckBox, QFrame
 
-MAIN_DIR = str(Path(__file__).parent.absolute())
-
-ICON_PATH = MAIN_DIR + "/" + "resource/diffusion_runner.ico"
-COMPLETE_SOUND = MAIN_DIR + "/" + "resource/complete_seq.wav"
-PIC_MADE_SOUND = MAIN_DIR + "/" + "resource/made_a_pic.wav"
-LOADED_SOUND = MAIN_DIR + "/" + "resource/model_loaded.wav"
+ICON_PATH = "resource/diffusion_runner.ico"
+COMPLETE_SOUND = "resource/complete_seq.wav"
+PIC_MADE_SOUND = "resource/made_a_pic.wav"
+LOADED_SOUND = "resource/model_loaded.wav"
 
 DEFAULT_PROMPT = "general, masterpiece, very aesthetic"
 DEFAULT_NEGATIVE_PROMPT = "lowres, (bad), text, error, fewer, extra, missing, worst quality, jpeg artifacts, " \
@@ -33,6 +31,13 @@ _start_button = None
 
 _config_dict: dict = {"default_model": ".", "default_prompt": DEFAULT_PROMPT,
                       "default_negative_prompt": DEFAULT_NEGATIVE_PROMPT}
+
+
+def get_main_dir() -> str:
+    main_dir = str(Path(__file__).parent.absolute())
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        main_dir = sys._MEIPASS
+    return main_dir
 
 
 def open_directory_dialog(lineEdit: QLineEdit):
@@ -94,7 +99,7 @@ def load_model(model: str):
         use_safetensors=True,
     )
     _pipe.to('cuda')
-    playsound(LOADED_SOUND)
+    playsound(get_main_dir() + "/" + LOADED_SOUND)
     _start_button.setDisabled(False)
 
 
@@ -115,9 +120,9 @@ def generate(prompt: str, negative_prompt: str, resolution: list[2], inf_steps: 
 
         path = Path(directory) / file_name
         image.save(path)
-        playsound(PIC_MADE_SOUND)
+        playsound(get_main_dir() + "/" + PIC_MADE_SOUND)
         print("done")
-    playsound(COMPLETE_SOUND)
+    playsound(get_main_dir() + "/" + COMPLETE_SOUND)
 
 
 class model_group(QGroupBox):
@@ -268,7 +273,7 @@ class generation_group(QGroupBox):
 if __name__ == '__main__':
     app = QApplication([])
     load_config()
-    app.setWindowIcon(QIcon(ICON_PATH))
+    app.setWindowIcon(QIcon(get_main_dir() + "/" + ICON_PATH))
     model_group_box = model_group()
     positive_prompt_box = prompt_group(has_char_mode=True)
     negative_prompt_box = prompt_group(main_title="Negative Prompts", prompt_title="Negative Prompt",
